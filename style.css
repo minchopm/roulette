@@ -116,8 +116,8 @@ html, body {
     .outside-bets-column { grid-area: outside-bets; display: flex; flex-direction: column; width: 100%; padding-top: 0; }
     .even-money-column, .dozens-column { flex-direction: row; flex-basis: auto; }
     .outside-bets-column .bet-spot { flex: 1; writing-mode: horizontal-tb; font-size: 1vw; padding: 1.5vh 0; }
-    .dozens-column { order: 1; }
-    .even-money-column { order: 2; }
+    .dozens-column { order: 1; z-index: 1}
+    .even-money-column { order: 2; z-index: 2}
 
     .chips-container, .action-buttons {
         align-self: baseline;
