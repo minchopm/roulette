@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Дъска за Рулетка</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="roulette-container">
+    <div class="betting-board">
+        <div class="board-layout">
+            <div class="outside-bets-column">
+                <div class="even-money-column">
+                    <div class="bet-spot" data-bet-area="1-18">1 - 18</div>
+                    <div class="bet-spot" data-bet-area="even">ЧЕТНО</div>
+                    <div class="bet-spot" data-bet-area="red">ЧЕРВЕНО</div>
+                    <div class="bet-spot" data-bet-area="black">ЧЕРНО</div>
+                    <div class="bet-spot" data-bet-area="odd">НЕЧЕТНО</div>
+                    <div class="bet-spot" data-bet-area="19-36">19 - 36</div>
+                </div>
+                <div class="dozens-column">
+                    <div class="bet-spot" data-bet-area="1st12">1ви 12</div>
+                    <div class="bet-spot" data-bet-area="2nd12">2ри 12</div>
+                    <div class="bet-spot" data-bet-area="3rd12">3ти 12</div>
+                </div>
+            </div>
+
+            <div class="number-area">
+                <div class="bet-spot zero-spot" data-bet-area="0">0</div>
+                <div class="number-grid">
+                    <div class="number-row">
+                        <div class="bet-spot red" data-bet-area="3">3</div><div class="bet-spot black" data-bet-area="6">6</div><div class="bet-spot red" data-bet-area="9">9</div><div class="bet-spot red" data-bet-area="12">12</div><div class="bet-spot black" data-bet-area="15">15</div><div class="bet-spot red" data-bet-area="18">18</div><div class="bet-spot red" data-bet-area="21">21</div><div class="bet-spot black" data-bet-area="24">24</div><div class="bet-spot red" data-bet-area="27">27</div><div class="bet-spot red" data-bet-area="30">30</div><div class="bet-spot black" data-bet-area="33">33</div><div class="bet-spot red" data-bet-area="36">36</div>
+                    </div>
+                    <div class="number-row">
+                        <div class="bet-spot black" data-bet-area="2">2</div><div class="bet-spot red" data-bet-area="5">5</div><div class="bet-spot black" data-bet-area="8">8</div><div class="bet-spot black" data-bet-area="11">11</div><div class="bet-spot red" data-bet-area="14">14</div><div class="bet-spot black" data-bet-area="17">17</div><div class="bet-spot black" data-bet-area="20">20</div><div class="bet-spot red" data-bet-area="23">23</div><div class="bet-spot black" data-bet-area="26">26</div><div class="bet-spot black" data-bet-area="29">29</div><div class="bet-spot red" data-bet-area="32">32</div><div class="bet-spot black" data-bet-area="35">35</div>
+                    </div>
+                    <div class="number-row">
+                        <div class="bet-spot red" data-bet-area="1">1</div><div class="bet-spot black" data-bet-area="4">4</div><div class="bet-spot red" data-bet-area="7">7</div><div class="bet-spot black" data-bet-area="10">10</div><div class="bet-spot red" data-bet-area="13">13</div><div class="bet-spot black" data-bet-area="16">16</div><div class="bet-spot red" data-bet-area="19">19</div><div class="bet-spot black" data-bet-area="22">22</div><div class="bet-spot red" data-bet-area="25">25</div><div class="bet-spot black" data-bet-area="28">28</div><div class="bet-spot black" data-bet-area="31">31</div><div class="bet-spot red" data-bet-area="34">34</div>
+                    </div>
+                </div>
+                <div class="column-bets">
+                    <div class="bet-spot" data-bet-area="2to1-3">2:1</div>
+                    <div class="bet-spot" data-bet-area="2to1-2">2:1</div>
+                    <div class="bet-spot" data-bet-area="2to1-1">2:1</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chips-container">
+        <div class="chip" data-value="1" draggable="true"><img src="assets/chip-background-1.png" alt="Chip 1"><span>1</span></div>
+        <div class="chip" data-value="2" draggable="true"><img src="assets/chip-background-2.png" alt="Chip 2"><span>2</span></div>
+        <div class="chip" data-value="5" draggable="true"><img src="assets/chip-background-3.png" alt="Chip 5"><span>5</span></div>
+    </div>
+
+    <div class="action-buttons">
+        <button id="undo-btn" class="action-button"><img src="assets/btn-undo.png" alt="Undo"></button>
+        <button id="clear-btn" class="action-button"><img src="assets/btn-clear.png" alt="Clear"></button>
+        <button id="double-btn" class="action-button"><img src="assets/btn-x2.png" alt="Double"></button>
+    </div>
+</div>
+
+<script src="touch-dnd-polyfill.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
