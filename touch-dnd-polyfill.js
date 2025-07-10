@@ -1,11 +1,24 @@
 const TouchDndPolyfill = {
-    longPressDelay: 250,
+    // We no longer need a long press delay. Instead, we use a threshold.
+    // This is the number of pixels the finger must move before a drag starts.
+    // It prevents accidental drags when the user just wants to tap.
+    dragThreshold: 5,
 
-    isDragging: false,
-    sourceElement: null,
-    ghostElement: null,
-    pressTimer: null,
-    lastTarget: null,
+    // --- State properties ---
+    isDragging: false,      // Is a drag operation currently in progress?
+    sourceElement: null,    // The element where the touch started
+    ghostElement: null,     // The floating element that follows the finger
+    lastTarget: null,       // The last element the finger was over
+
+    // Initial touch coordinates
+    startX: 0,
+    startY: 0,
+
+    // We store pre-bound versions of our event handlers
+    // to ensure `removeEventListener` works correctly.
+    boundOnTouchMove: null,
+    boundOnTouchEnd: null,
+    boundOnTouchCancel: null,
 
     dataTransfer: {
         data: {},
@@ -15,48 +28,69 @@ const TouchDndPolyfill = {
     },
 
     init() {
+        // Pre-bind event handlers to `this`
+        this.boundOnTouchMove = this.onTouchMove.bind(this);
+        this.boundOnTouchEnd = this.onTouchEnd.bind(this);
+        this.boundOnTouchCancel = this.onTouchCancel.bind(this);
+
         document.addEventListener('touchstart', this.onTouchStart.bind(this), { passive: false });
     },
 
 
     onTouchStart(event) {
+        // Find the draggable element the user touched
         const element = event.target.closest('[draggable="true"]');
-        if (!element) return;
+        if (!element || this.isDragging) return;
 
         this.sourceElement = element;
+        const touch = event.touches[0];
+        this.startX = touch.clientX;
+        this.startY = touch.clientY;
 
-        this.pressTimer = setTimeout(() => {
-            event.preventDefault();
-            this.isDragging = true;
-            this.dataTransfer.clearData();
-
-            this.dispatchEvent(this.sourceElement, 'dragstart', event.touches[0]);
-
-            this.createGhost(event.touches[0]);
-
-            document.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false });
-            document.addEventListener('touchend', this.onTouchEnd.bind(this));
-            document.addEventListener('touchcancel', this.onTouchCancel.bind(this));
-        }, this.longPressDelay);
+        // Add move and end listeners to the whole document.
+        // The drag won't start yet, but we're ready for it.
+        document.addEventListener('touchmove', this.boundOnTouchMove, { passive: false });
+        document.addEventListener('touchend', this.boundOnTouchEnd);
+        document.addEventListener('touchcancel', this.boundOnTouchCancel);
     },
 
     onTouchMove(event) {
-        if (this.pressTimer) {
-            clearTimeout(this.pressTimer);
-            this.pressTimer = null;
+        if (!this.sourceElement) return;
+
+        // --- DRAG INITIATION LOGIC ---
+        // If we aren't dragging yet, check if the finger has moved past the threshold
+        if (!this.isDragging) {
+            const touch = event.touches[0];
+            const dx = Math.abs(touch.clientX - this.startX);
+            const dy = Math.abs(touch.clientY - this.startY);
+
+            if (Math.sqrt(dx*dx + dy*dy) < this.dragThreshold) {
+                // Not moved enough, so do nothing.
+                return;
+            }
+
+            // Threshold passed! Start the drag.
+            this.isDragging = true;
+            this.dataTransfer.clearData();
+            // Dispatch the 'dragstart' event so the main script can react
+            this.dispatchEvent(this.sourceElement, 'dragstart', touch);
+            // Create the visual ghost element
+            this.createGhost(touch);
         }
 
-        if (!this.isDragging) return;
-
-        event.preventDefault();
+        // This part runs on every move event *after* the drag has started
+        event.preventDefault(); // Prevent page scrolling
 
         const touch = event.touches[0];
 
+        // Move the ghost element
         if (this.ghostElement) {
             this.ghostElement.style.left = `${touch.clientX - (this.ghostElement.offsetWidth / 2)}px`;
             this.ghostElement.style.top = `${touch.clientY - (this.ghostElement.offsetHeight / 2)}px`;
         }
 
+        // --- DRAG OVER/ENTER/LEAVE LOGIC ---
+        // Temporarily hide the ghost to find the element underneath
         if (this.ghostElement) this.ghostElement.style.display = 'none';
         const currentTarget = document.elementFromPoint(touch.clientX, touch.clientY);
         if (this.ghostElement) this.ghostElement.style.display = '';
@@ -77,21 +111,23 @@ const TouchDndPolyfill = {
     },
 
     onTouchEnd(event) {
-        if (this.pressTimer) {
-            clearTimeout(this.pressTimer);
-            this.pressTimer = null;
-        }
-
+        // Only do drop/dragend logic if a drag actually started
         if (this.isDragging) {
             const touch = event.changedTouches[0];
 
-            if (this.lastTarget) {
-                this.dispatchEvent(this.lastTarget, 'drop', touch);
+            // Find the final drop target
+            if (this.ghostElement) this.ghostElement.style.display = 'none';
+            const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (this.ghostElement) this.ghostElement.style.display = '';
+
+            if (dropTarget) {
+                this.dispatchEvent(dropTarget, 'drop', touch);
             }
 
             this.dispatchEvent(this.sourceElement, 'dragend', touch);
         }
 
+        // Always clean up state and listeners
         this.cleanup();
     },
 
@@ -115,17 +151,16 @@ const TouchDndPolyfill = {
         this.isDragging = false;
         this.sourceElement = null;
         this.lastTarget = null;
-        if (this.pressTimer) clearTimeout(this.pressTimer);
-        this.pressTimer = null;
 
         if (this.ghostElement) {
             this.ghostElement.remove();
             this.ghostElement = null;
         }
 
-        document.removeEventListener('touchmove', this.onTouchMove.bind(this));
-        document.removeEventListener('touchend', this.onTouchEnd.bind(this));
-        document.removeEventListener('touchcancel', this.onTouchCancel.bind(this));
+        // Remove the listeners we added in onTouchStart
+        document.removeEventListener('touchmove', this.boundOnTouchMove);
+        document.removeEventListener('touchend', this.boundOnTouchEnd);
+        document.removeEventListener('touchcancel', this.boundOnTouchCancel);
     },
 
     dispatchEvent(target, type, touch) {
