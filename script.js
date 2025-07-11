@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initialize() {
         const initialChip = chipsContainer.querySelector('.chip[data-value="1"]');
-        if (initialChip) initialChip.classList.add('selected');
+        if (initialChip) selectChip(initialChip);
         addEventListeners();
     }
 
@@ -47,6 +47,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.addEventListener('dragover', handleWindowDragOver);
         window.addEventListener('drop', handleWindowDrop);
+    }
+
+    function selectChip(chipElement) {
+        if (!chipElement) return;
+        selectedChipValue = parseInt(chipElement.dataset.value, 10);
+        allChips.forEach(chip => chip.classList.remove('selected'));
+        chipElement.classList.add('selected');
     }
 
     function applyTransaction(transaction) {
@@ -82,10 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleChipSelection(event) {
         const clickedChip = event.target.closest('.chip');
-        if (!clickedChip) return;
-        selectedChipValue = parseInt(clickedChip.dataset.value);
-        allChips.forEach(chip => chip.classList.remove('selected'));
-        clickedChip.classList.add('selected');
+        selectChip(clickedChip);
     }
 
     function handleBetPlacement(event) {
@@ -132,6 +136,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleChipDragStart(event) {
         const chip = event.target.closest('.chip');
+        if (!chip) return;
+
+        selectChip(chip);
+
         event.dataTransfer.setData('application/json', JSON.stringify({ type: 'new_chip', value: chip.dataset.value }));
         setTimeout(() => chip.classList.add('dragging'), 0);
     }
